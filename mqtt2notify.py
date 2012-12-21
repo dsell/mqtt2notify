@@ -12,6 +12,7 @@ __author__ = "Dennis Sell"
 __copyright__ = "Copyright (C) Dennis Sell"
 
 
+import os
 import sys
 import logging
 import signal
@@ -33,7 +34,8 @@ LOGFILE = "/var/log/mqtt-growl.log"
 #TODO might want to add a lock file
 #TODO  need to deal with no config file existing!!!
 #read in configuration file
-f = file('.mqtt2notify.conf')
+homedir = os.path.expanduser("~")
+f = file(homedir + '/.mqtt2notify.conf')
 cfg = Config(f)
 MQTT_HOST = cfg.MQTT_HOST
 MQTT_PORT = cfg.MQTT_PORT
