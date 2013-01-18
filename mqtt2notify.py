@@ -21,6 +21,7 @@ import pynotify
 import mosquitto
 import socket
 from config import Config
+import commands
 
 
 CLIENT_NAME = "mqtt2notify[" + socket.gethostname() + "]"
@@ -52,8 +53,11 @@ def on_connect( self, obj, rc):
 	print "Connected"
 	n = pynotify.Notification ( "MQTT Connected." )
 	n.show ()
-	mqttc.publish ( CLIENT_BASE + "/status" , "connected", 1, 1 )
+	mqttc.publish ( CLIENT_BASE + "/status" , "online", 1, 1 )
 	mqttc.publish( CLIENT_BASE + "/version", CLIENT_VERSION, 1, 1 )
+	ip = commands.getoutput("/sbin/ifconfig").split("\n")[1].split()[1][5:]
+	mqttc.publish( "/clients/" + CLIENT_NAME + "/ip", ip, 1, 1 )
+	mqttc.publish( "/clients/" + CLIENT_NAME + "/pid", os.getpid(), 1, 1 )
 	for topic in WATCH_TOPICS:
 		mqttc.subscribe( topic, 2 )
 	mqttc.subscribe( CLIENT_BASE + "ping", 2)
@@ -82,6 +86,7 @@ def mqtt_disconnect():
 		print "MQTT Disconnected"
 		n = pynotify.Notification ( "MQTT disconnected." )
 		n.show ()
+		mqttc.publish ( "/clients/" + CLIENT_NAME + "/status" , "offline", 1, 1 )
 
 
 def mqtt_connect():
@@ -89,7 +94,7 @@ def mqtt_connect():
 	rc = 1
 	while ( rc ):
 		print "Attempting connection..."
-		mqttc.will_set( CLIENT_BASE + "/status", "disconnected_", 1, 1)
+		mqttc.will_set( CLIENT_BASE + "/status", "disconnected", 1, 1)
 
 		#define the mqtt callbacks
 		mqttc.on_message = on_message
@@ -100,7 +105,7 @@ def mqtt_connect():
 		rc = mqttc.connect( MQTT_HOST, MQTT_PORT, MQTT_TIMEOUT )
 		if rc != 0:
 			logging.info( "Connection failed with error code $s, Retrying in 30 seconds.", rc )
-			print "Connection failed with error code ", rc, ", Retrying in 30 seconds." 
+			print "Connection failed with error code ", mosquitto.connack_string(rc), ", Retrying in 30 seconds." 
 			time.sleep(30)
 		else:
 			print "Connect initiated OK"
@@ -129,7 +134,7 @@ def main_loop():
 			rc = mqttc.loop(10)
 			if rc != 0:	
 				mqtt_disconnect()
-				print rc
+				print "loop error ", mosquitto.error_string(rc)
 				print "Stalling for 20 seconds to allow broker connection to time out."
 				time.sleep(20)
 				mqtt_connect()
