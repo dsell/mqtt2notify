@@ -36,7 +36,6 @@ class MQTTClientCore:
         self.clientversion = "unknown"
         homedir = os.path.expanduser("~")
         self.configfile = homedir + "/." + appname + '.conf'
-        self.clientbase = "/clients/" + appname + "/"
         self.mqtttimeout = 60    # seconds
 
         if ('type1' == self.clienttype):
@@ -48,7 +47,7 @@ class MQTTClientCore:
                               str(os.getpid()) + "]"
         else: # catchall
             self.clientname = appname
-
+        self.clientbase = "/clients/" + self.clientname + "/"
         LOGFORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
         #TODO  need to deal with no config file existing!!!
