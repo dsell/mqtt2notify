@@ -41,8 +41,6 @@ class MyMQTTClientCore(MQTTClientCore):
     def on_disconnect(self, mself, obj, rc):
         MQTTClientCore.on_disconnect(self, mself, obj, rc)
         print "MQTT Disconnected"
-        n = pynotify.Notification("MQTT disconnected.")
-        n.show()
 
     def on_message(self, mself, obj, msg):
         MQTTClientCore.on_message(self, mself, obj, msg)
