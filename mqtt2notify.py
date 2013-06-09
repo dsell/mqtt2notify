@@ -51,7 +51,7 @@ class MyMQTTClientCore(MQTTClientCore):
 
 class MyDaemon(Daemon):
     def run(self):
-        mqttcore = MyMQTTClientCore(APPNAME, clienttype="type2")
+        mqttcore = MyMQTTClientCore(APPNAME, clienttype="multi")
         mqttcore.main_loop()
 
 
